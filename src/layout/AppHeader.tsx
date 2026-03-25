@@ -87,7 +87,7 @@ const AppHeader: React.FC = () => {
             <Image
               width={160}
               height={40}
-              src="/images/logo/logo.png"
+              src="/images/logo/logo-main.png"
               alt="Logo"
             />
           </Link>

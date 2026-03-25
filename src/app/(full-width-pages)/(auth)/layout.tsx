@@ -20,28 +20,28 @@ export default function AuthLayout({
             <div className="relative items-center justify-center  flex z-1">
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
-              <div className="flex flex-col items-center max-w-sm px-6">
+              <div className="flex flex-col items-center max-w-xl px-10">
                 <Link href="/" className="block mb-8">
                   <Image
-                    width={280}
-                    height={80}
+                    width={320}
+                    height={100}
                     src="/images/logo/logo-light.png"
                     alt="Logo"
                     className="dark:hidden"
                   />
                   <Image
-                    width={280}
-                    height={80}
+                    width={320}
+                    height={100}
                     src="/images/logo/logo-light-low.webp"
                     alt="Logo"
                     className="hidden dark:block"
                   />
                 </Link>
-                <div className="text-center">
-                  <p className="text-white text-2xl md:text-3xl font-medium mb-3">
+                <div className="text-center w-full">
+                  <p className="text-white text-3xl md:text-4xl font-semibold mb-3 whitespace-nowrap">
                     A Pest Management Company.
                   </p>
-                  <p className="text-brand-400 font-extrabold text-3xl md:text-4xl uppercase tracking-wider">
+                  <p className="text-brand-500 font-extrabold text-3xl md:text-4xl uppercase tracking-wider whitespace-nowrap">
                     A-Flick and It’s Gone!
                   </p>
                 </div>

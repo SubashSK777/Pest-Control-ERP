@@ -10,7 +10,9 @@ export const metadata: Metadata = {
   title: 'A-Flick CRM',
   description: 'A Pest Management Company. A-Flick and It’s Gone!',
   icons: {
-    icon: '/images/logo/logo.png',
+    icon: '/images/logo/logo-main.png',
+    shortcut: '/images/logo/logo-main.png',
+    apple: '/images/logo/logo-main.png',
   },
 };
 
