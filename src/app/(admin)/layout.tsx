@@ -15,9 +15,11 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated");
-    if (authStatus !== "true") {
-      router.push("/login");
+    if (typeof window !== "undefined") {
+      const authStatus = localStorage.getItem("isAuthenticated");
+      if (authStatus !== "true") {
+        router.replace("/login");
+      }
     }
   }, [router]);
 
