@@ -33,8 +33,21 @@ const navItems: NavItem[] = [
   },
   {
     icon: <TableIcon />,
-    name: "Masters",
-    subItems: [],
+    name: "Master",
+    subItems: [
+      { name: "Tax", path: "/master/tax" },
+      { name: "Company Origin", path: "/master/company-origin" },
+      { name: "Service Frequency", path: "/master/service-frequency" },
+      { name: "Billing Frequency", path: "/master/billing-frequency" },
+      { name: "Unit Of Measurement", path: "/master/uom" },
+      { name: "Call Type", path: "/master/call-type" },
+      { name: "Industry", path: "/master/industry" },
+      { name: "Holidays", path: "/master/holidays" },
+      { name: "Incident", path: "/master/incident" },
+      { name: "Todo Items", path: "/master/todo-items" },
+      { name: "Site Risk", path: "/master/site-risk" },
+      { name: "Equipments", path: "/master/equipments" },
+    ],
   },
 ];
 
@@ -48,7 +61,7 @@ const AppSidebar: React.FC = () => {
     navItems: NavItem[],
     menuType: "main" | "others"
   ) => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-2">
       {navItems.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
