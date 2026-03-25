@@ -14,14 +14,20 @@ export default function AdminLayout({
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const router = useRouter();
 
+  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const authStatus = localStorage.getItem("isAuthenticated");
       if (authStatus !== "true") {
         router.replace("/login");
+      } else {
+        setIsAuthenticated(true);
       }
     }
   }, [router]);
+
+  if (isAuthenticated === null) return null;
 
   // Dynamic class for main content margin based on sidebar state
   const mainContentMargin = isMobileOpen

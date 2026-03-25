@@ -8,7 +8,7 @@ import { BootstrapProvider } from '@/context/BootstrapContext';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'A-Flick CRM',
+  title: 'A-Flick Pest Management',
   description: 'A Pest Management Company. A-Flick and It’s Gone!',
   icons: {
     icon: '/images/logo/logo-dark-icon.png',

@@ -15,7 +15,7 @@ export default function AuthLayout({
         <div className="w-full max-w-[480px]">
           {/* Branding Section */}
           <div className="flex flex-col items-center mb-10">
-            <Link href="/" className="block mb-6">
+            <Link href="/login" className="block mb-6">
               <Image
                 width={300}
                 height={80}
