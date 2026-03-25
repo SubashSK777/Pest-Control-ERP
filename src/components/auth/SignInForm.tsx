@@ -26,7 +26,8 @@ export default function SignInForm() {
       if (email.toLowerCase() === "dev@aflick.com" && password === "123456") {
         if (typeof window !== "undefined") {
           localStorage.setItem("isAuthenticated", "true");
-          router.replace("/");
+          // Hard redirect to dashboard
+          window.location.href = "/";
         }
       } else {
         setError("Invalid credentials. Please use dev@aflick.com / 123456.");
