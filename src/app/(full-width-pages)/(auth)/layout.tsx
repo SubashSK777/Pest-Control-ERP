@@ -16,22 +16,35 @@ export default function AuthLayout({
       <ThemeProvider>
         <div className="relative flex lg:flex-row w-full h-screen justify-center flex-col  dark:bg-gray-900 sm:p-0">
           {children}
-          <div className="lg:w-1/2 w-full h-full bg-brand-950 dark:bg-white/5 lg:grid items-center hidden">
+          <div className="lg:w-1/2 w-full h-full bg-black dark:bg-white/5 lg:grid items-center hidden">
             <div className="relative items-center justify-center  flex z-1">
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
-              <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
+              <div className="flex flex-col items-center max-w-sm px-6">
+                <Link href="/" className="block mb-8">
                   <Image
-                    width={231}
-                    height={48}
-                    src="/images/logo/logo-light.webp"
+                    width={280}
+                    height={80}
+                    src="/images/logo/logo-light.png"
                     alt="Logo"
+                    className="dark:hidden"
+                  />
+                  <Image
+                    width={280}
+                    height={80}
+                    src="/images/logo/logo-light-low.webp"
+                    alt="Logo"
+                    className="hidden dark:block"
                   />
                 </Link>
-                <p className="text-center text-gray-400 dark:text-white/60">
-                  A Pest Management Company. A-Flick and It’s Gone!
-                </p>
+                <div className="text-center">
+                  <p className="text-white text-2xl md:text-3xl font-medium mb-3">
+                    A Pest Management Company.
+                  </p>
+                  <p className="text-brand-400 font-extrabold text-3xl md:text-4xl uppercase tracking-wider">
+                    A-Flick and It’s Gone!
+                  </p>
+                </div>
               </div>
             </div>
           </div>

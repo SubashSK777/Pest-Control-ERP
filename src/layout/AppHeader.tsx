@@ -85,9 +85,9 @@ const AppHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <Image
-              width={154}
-              height={32}
-              src="/images/logo/logo-light.webp"
+              width={160}
+              height={40}
+              src="/images/logo/logo.png"
               alt="Logo"
             />
           </Link>
