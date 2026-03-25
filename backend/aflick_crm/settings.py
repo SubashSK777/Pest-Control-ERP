@@ -62,16 +62,12 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
         conn_max_age=600,
-        ssl_require=True
     )
 }
 
-# Supabase PostgreSQL handling if not using direct URL string
-if not os.getenv('DATABASE_URL'):
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
-    }
+# If using Supabase, ensure SSL is enforced if it's not in the URL
+if os.getenv('DATABASE_URL') and 'sslmode' not in os.getenv('DATABASE_URL'):
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 
 AUTH_PASSWORD_VALIDATORS = [
