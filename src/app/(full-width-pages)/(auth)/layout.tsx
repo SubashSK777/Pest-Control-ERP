@@ -1,4 +1,3 @@
-import GridShape from "@/components/common/GridShape";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -50,7 +49,7 @@ export default function AuthLayout({
             {children}
           </div>
 
-          <div className="mt-8 flex justify-center">
+          <div className="absolute top-6 right-6">
             <ThemeTogglerTwo />
           </div>
         </div>
