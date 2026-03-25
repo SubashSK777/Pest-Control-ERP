@@ -8,6 +8,7 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
+  DatabaseIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -26,7 +27,18 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [];
+const navItems: NavItem[] = [
+  {
+    icon: <GridIcon />,
+    name: "Dashboard",
+    path: "/",
+  },
+  {
+    icon: <DatabaseIcon />,
+    name: "Masters",
+    subItems: [],
+  },
+];
 
 const othersItems: NavItem[] = [];
 
