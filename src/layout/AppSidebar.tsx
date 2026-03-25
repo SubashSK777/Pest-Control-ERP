@@ -147,7 +147,16 @@ const AppSidebar: React.FC = () => {
                           : "menu-dropdown-item-inactive"
                       }`}
                     >
-                      {subItem.name}
+                      <span className="flex items-center gap-3">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            isActive(subItem.path)
+                              ? "bg-brand-500"
+                              : "bg-gray-400 dark:bg-gray-600"
+                          }`}
+                        ></span>
+                        {subItem.name}
+                      </span>
                       <span className="flex items-center gap-1 ml-auto">
                         {subItem.new && (
                           <span
