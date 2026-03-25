@@ -8,13 +8,11 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
-  DatabaseIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
   PieChartIcon,
-  PlugInIcon,
   TableIcon,
   UserCircleIcon,
 } from "../icons/index";
@@ -34,7 +32,7 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <DatabaseIcon />,
+    icon: <TableIcon />,
     name: "Masters",
     subItems: [],
   },
