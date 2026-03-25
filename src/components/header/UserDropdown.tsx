@@ -63,10 +63,10 @@ export default function UserDropdown() {
         className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
         <div className="mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
-          <span className="block font-semibold text-gray-800 text-theme-sm dark:text-white/90">
+          <span className="block font-bold text-gray-800 text-lg dark:text-white/95">
             Admin
           </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
+          <span className="mt-1 block text-base text-gray-500 dark:text-gray-400">
             dev@aflick.com
           </span>
         </div>
