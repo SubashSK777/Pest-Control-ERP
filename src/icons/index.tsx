@@ -59,8 +59,12 @@ import MapIcon from "./map-marker.svg";
 import BarChartIcon from "./bar-chart.svg";
 import BarChartDollarIcon from "./bar-chart-dollar.svg";
 import TrendUpIcon from "./trend-up.svg";
+import RefreshIcon from "./refresh.svg";
+import PrintIcon from "./print.svg";
 
 export {
+  PrintIcon,
+  RefreshIcon,
   DownloadIcon,
   BellIcon,
   MoreDotIcon,

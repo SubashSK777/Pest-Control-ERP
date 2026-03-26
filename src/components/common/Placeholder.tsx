@@ -11,8 +11,8 @@ const Placeholder: React.FC<PlaceholderProps> = ({ title, description }) => {
     <>
       <PageBreadcrumb pageTitle={title} />
       <div className="grid grid-cols-1">
-        <div className="rounded-2xl border border-gray-300 bg-white p-5 dark:border-gray-700 dark:bg-white/[0.03] md:p-10">
-          <div className="mb-8">
+        <div className="rounded-2xl border border-gray-300 bg-white p-5 md:px-10 md:pt-4 md:pb-10 dark:border-gray-700 dark:bg-white/[0.03]">
+          <div className="mb-4 text-left">
              <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
                 {title}
              </h2>

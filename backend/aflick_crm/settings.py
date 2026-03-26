@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'authentication',
+    'crm',
 ]
 
 MIDDLEWARE = [
@@ -60,14 +61,13 @@ WSGI_APPLICATION = 'aflick_crm.wsgi'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
         conn_max_age=600,
     )
 }
-
-# If using Supabase, ensure SSL is enforced if it's not in the URL
-if os.getenv('DATABASE_URL') and 'sslmode' not in os.getenv('DATABASE_URL'):
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+# Enforce SSL for all connections to Render Postgres
+if 'OPTIONS' not in DATABASES['default']:
+    DATABASES['default']['OPTIONS'] = {}
+DATABASES['default']['OPTIONS']['sslmode'] = 'require'
 
 
 AUTH_PASSWORD_VALIDATORS = [
