@@ -34,7 +34,7 @@ const Drawer: React.FC<DrawerProps> = ({
     <>
       {/* Backdrop */}
       <div 
-        className={`fixed inset-0 z-[100] bg-black/30 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
+        className={`fixed inset-0 z-[999998] bg-black/40 backdrop-blur-md transition-opacity duration-300 ease-in-out ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -42,7 +42,7 @@ const Drawer: React.FC<DrawerProps> = ({
       
       {/* Sliding Panel */}
       <div 
-        className={`fixed top-0 right-0 z-[101] h-screen w-full ${width} bg-white shadow-2xl transition-transform duration-500 ease-in-out dark:bg-gray-dark ${
+        className={`fixed top-0 right-0 z-[999999] h-screen w-full ${width} bg-white shadow-2xl transition-transform duration-500 ease-in-out dark:bg-gray-900 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
