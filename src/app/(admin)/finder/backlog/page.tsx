@@ -1,5 +1,6 @@
-import Placeholder from "@/components/common/Placeholder";
+'use client';
+import Placeholder from '@/components/common/Placeholder';
 
 export default function Page() {
-  return <Placeholder title="Backlog" />;
+  return <Placeholder title="Backlog Finder" />;
 }
