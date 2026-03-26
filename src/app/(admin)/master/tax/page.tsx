@@ -76,6 +76,11 @@ export default function TaxPage() {
     setSortConfig({ key, direction });
   };
 
+  const openEditDrawer = (tax: Tax) => {
+    setEditingTax(tax);
+    setIsDrawerOpen(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingTax) {
