@@ -15,6 +15,15 @@ import {
   PieChartIcon,
   TableIcon,
   UserCircleIcon,
+  GroupIcon,
+  BoxIcon,
+  DollarLineIcon,
+  FileIcon,
+  PlugInIcon,
+  TimeIcon,
+  EyeIcon,
+  DocsIcon,
+  TaskIcon,
 } from "../icons/index";
 
 
@@ -49,17 +58,145 @@ const navItems: NavItem[] = [
       { name: "Equipments", path: "/master/equipments" },
     ],
   },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Vehicle",
+    path: "/vehicle",
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "Employee",
+    subItems: [
+      { name: "Department", path: "/employee/department" },
+      { name: "Designation", path: "/employee/designation" },
+      { name: "Employee List", path: "/employee/list" },
+      { name: "Employee Leave Type", path: "/employee/leave-type" },
+      { name: "User Privilege", path: "/employee/privilege" },
+    ],
+  },
+  {
+    icon: <CalenderIcon />,
+    name: "Employee Leaves",
+    path: "/employee-leaves",
+  },
+  {
+    icon: <TaskIcon />,
+    name: "Service Type (Pest)",
+    path: "/service-type",
+  },
+  {
+    icon: <GroupIcon />,
+    name: "Customers",
+    path: "/customers",
+  },
+  {
+    icon: <BoxIcon />,
+    name: "Purchase & Stock",
+    subItems: [
+      { name: "Suppliers", path: "/purchase-stock/suppliers" },
+      { name: "Chemicals", path: "/purchase-stock/chemicals" },
+      { name: "Purchase Order", path: "/purchase-stock/order" },
+      { name: "Purchase Inward", path: "/purchase-stock/inward" },
+      { name: "Purchase Return", path: "/purchase-stock/return" },
+      { name: "Material Request", path: "/purchase-stock/request" },
+      { name: "Material Issue", path: "/purchase-stock/issue" },
+      { name: "Material Return", path: "/purchase-stock/material-return" },
+      { name: "Stock Summary", path: "/purchase-stock/summary" },
+      { name: "Vehicle Stock Summary", path: "/purchase-stock/vehicle-summary" },
+      { name: "Material Usage", path: "/purchase-stock/usage" },
+    ],
+  },
+  {
+    icon: <DollarLineIcon />,
+    name: "Sales",
+    subItems: [
+      { name: "Proposal Content", path: "/sales/proposal-content" },
+      { name: "Sales Proposal", path: "/sales/proposal" },
+    ],
+  },
+  {
+    icon: <FileIcon />,
+    name: "Contracts",
+    path: "/contracts",
+  },
+  {
+    icon: <PlugInIcon />,
+    name: "Service Request",
+    path: "/service-request",
+  },
+  {
+    icon: <CalenderIcon />,
+    name: "Calendar",
+    path: "/calendar",
+  },
+  {
+    icon: <DollarLineIcon />,
+    name: "Invoice",
+    path: "/invoice",
+  },
+  {
+    icon: <TimeIcon />,
+    name: "Attendance",
+    subItems: [
+      { name: "Slots", path: "/attendance/slots" },
+      { name: "Attendance", path: "/attendance/records" },
+      { name: "Schedule", path: "/attendance/schedule" },
+      { name: "Attendance Timesheet", path: "/attendance/timesheet" },
+      { name: "Payslip Summary Report", path: "/attendance/payslip-report" },
+    ],
+  },
+  {
+    icon: <EyeIcon />,
+    name: "View Contract Status",
+    path: "/contract-status",
+  },
+  {
+    icon: <GridIcon />,
+    name: "Map",
+    path: "/map",
+  },
 ];
 
-const othersItems: NavItem[] = [];
+const finderItems: NavItem[] = [
+  { name: "Non Pre-Schedule", icon: <ListIcon />, path: "/finder/non-pre-schedule" },
+  { name: "Backlog Finder", icon: <ListIcon />, path: "/finder/backlog" },
+  { name: "Followup Finder", icon: <ListIcon />, path: "/finder/followup" },
+  { name: "KIV Finder", icon: <ListIcon />, path: "/finder/kiv" },
+  { name: "Productivity Finder", icon: <ListIcon />, path: "/finder/productivity" },
+];
+
+const reportItems: NavItem[] = [
+  { name: "Service Summary Report", icon: <PieChartIcon />, path: "/reports/service-summary" },
+  { name: "RIC / Follow-up Report", icon: <PieChartIcon />, path: "/reports/ric-followup" },
+  { name: "Productivity Summary", icon: <PieChartIcon />, path: "/reports/productivity" },
+  { name: "SCDF Report", icon: <PieChartIcon />, path: "/reports/scdf" },
+  { name: "Sales Report", icon: <PieChartIcon />, path: "/reports/sales" },
+  { name: "Pest Trending", icon: <PieChartIcon />, path: "/reports/pest-trending" },
+];
+
+const auditItems: NavItem[] = [
+  { name: "Customer Audit", icon: <DocsIcon />, path: "/audit/customer" },
+  { name: "Contracts Audit", icon: <DocsIcon />, path: "/audit/contracts" },
+];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
 
+  const [openSubmenu, setOpenSubmenu] = useState<{
+    type: string;
+    index: number;
+  } | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
+    {}
+  );
+  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const isActive = useCallback((path: string) => path === pathname, [pathname]);
+
   const renderMenuItems = (
     navItems: NavItem[],
-    menuType: "main" | "others"
+    menuType: string
   ) => (
     <ul className="flex flex-col gap-2">
       {navItems.map((nav, index) => (
@@ -157,30 +294,6 @@ const AppSidebar: React.FC = () => {
                         ></span>
                         {subItem.name}
                       </span>
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge `}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge `}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
                     </Link>
                   </li>
                 ))}
@@ -192,29 +305,22 @@ const AppSidebar: React.FC = () => {
     </ul>
   );
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // const isActive = (path: string) => path === pathname;
-   const isActive = useCallback((path: string) => path === pathname, [pathname]);
-
   useEffect(() => {
-    // Check if the current path matches any submenu item
     let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
-      items.forEach((nav, index) => {
+    const allGroups = [
+      { type: "main", items: navItems },
+      { type: "finder", items: finderItems },
+      { type: "reports", items: reportItems },
+      { type: "audit", items: auditItems },
+    ];
+
+    allGroups.forEach((group) => {
+      group.items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
               setOpenSubmenu({
-                type: menuType as "main" | "others",
+                type: group.type,
                 index,
               });
               submenuMatched = true;
@@ -224,14 +330,12 @@ const AppSidebar: React.FC = () => {
       });
     });
 
-    // If no submenu item matches, close the open submenu
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [pathname,isActive]);
+  }, [pathname, isActive]);
 
   useEffect(() => {
-    // Set the height of the submenu items when the submenu is opened
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
       if (subMenuRefs.current[key]) {
@@ -243,7 +347,7 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
+  const handleSubmenuToggle = (index: number, menuType: string) => {
     setOpenSubmenu((prevOpenSubmenu) => {
       if (
         prevOpenSubmenu &&
@@ -334,6 +438,40 @@ const AppSidebar: React.FC = () => {
               {renderMenuItems(navItems, "main")}
             </div>
 
+            <div>
+              <h2
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
+                }`}
+              >
+                {isExpanded || isHovered || isMobileOpen ? (
+                  "Finder"
+                ) : (
+                  <HorizontaLDots />
+                )}
+              </h2>
+              {renderMenuItems(finderItems, "finder")}
+            </div>
+
+            <div>
+              <h2
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
+                }`}
+              >
+                {isExpanded || isHovered || isMobileOpen ? (
+                  "Reports"
+                ) : (
+                  <HorizontaLDots />
+                )}
+              </h2>
+              {renderMenuItems(reportItems, "reports")}
+            </div>
+
             <div className="">
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
@@ -343,12 +481,12 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  "Audit Trial"
                 ) : (
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(othersItems, "others")}
+              {renderMenuItems(auditItems, "audit")}
             </div>
           </div>
         </nav>
@@ -356,5 +494,6 @@ const AppSidebar: React.FC = () => {
     </aside>
   );
 };
+
 
 export default AppSidebar;
