@@ -98,6 +98,11 @@ export default function TaxPage() {
     setSortConfig({ key, direction });
   };
 
+  const openEditDrawer = (tax: Tax) => {
+    setEditingTax(tax);
+    setIsDrawerOpen(true);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name) { setFormErrors({ name: "Required" }); return; }
@@ -294,7 +299,7 @@ export default function TaxPage() {
       </div>
 
       {/* Popups Integrated with Theme */}
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Tax Entry" width="max-w-[380px]">
+      <Drawer isOpen={isDrawerOpen} onClose={() => { setIsDrawerOpen(false); setEditingTax(null); }} title={editingTax ? "Edit Tax" : "Tax Entry"} width="max-w-[380px]">
         <form onSubmit={handleSave} className="flex flex-col gap-6 p-1">
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">Tax Name</span>
