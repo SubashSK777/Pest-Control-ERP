@@ -5,25 +5,29 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChevronDownIcon,
   GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  TableIcon,
-  UserCircleIcon,
-  GroupIcon,
-  BoxIcon,
-  DollarLineIcon,
+  DatabaseIcon,
+  VehicleIcon,
+  UserIcon,
+  CalendarIcon,
+  BugIcon,
+  UsersIcon,
+  StockIcon,
+  DollarIcon,
   FileIcon,
-  PlugInIcon,
-  TimeIcon,
+  MessageIcon,
+  CreditCardIcon,
+  WatchIcon,
   EyeIcon,
-  DocsIcon,
-  TaskIcon,
+  MapIcon,
+  SearchIcon,
+  PieChartIcon,
+  BarChartIcon,
+  BarChartDollarIcon,
+  TrendUpIcon,
+  ShieldIcon,
+  ChevronDownIcon,
+  HorizontaLDots,
 } from "../icons/index";
 
 
@@ -41,7 +45,7 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    icon: <TableIcon />,
+    icon: <DatabaseIcon />,
     name: "Master",
     subItems: [
       { name: "Tax", path: "/master/tax" },
@@ -59,12 +63,12 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <BoxCubeIcon />,
+    icon: <VehicleIcon />,
     name: "Vehicle",
     path: "/vehicle",
   },
   {
-    icon: <UserCircleIcon />,
+    icon: <UserIcon />,
     name: "Employee",
     subItems: [
       { name: "Department", path: "/employee/department" },
@@ -75,22 +79,22 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <CalenderIcon />,
+    icon: <CalendarIcon />,
     name: "Employee Leaves",
     path: "/employee-leaves",
   },
   {
-    icon: <TaskIcon />,
+    icon: <BugIcon />,
     name: "Service Type (Pest)",
     path: "/service-type",
   },
   {
-    icon: <GroupIcon />,
+    icon: <UsersIcon />,
     name: "Customers",
     path: "/customers",
   },
   {
-    icon: <BoxIcon />,
+    icon: <StockIcon />,
     name: "Purchase & Stock",
     subItems: [
       { name: "Suppliers", path: "/purchase-stock/suppliers" },
@@ -107,7 +111,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <DollarLineIcon />,
+    icon: <DollarIcon />,
     name: "Sales",
     subItems: [
       { name: "Proposal Content", path: "/sales/proposal-content" },
@@ -120,22 +124,22 @@ const navItems: NavItem[] = [
     path: "/contracts",
   },
   {
-    icon: <PlugInIcon />,
+    icon: <MessageIcon />,
     name: "Service Request",
     path: "/service-request",
   },
   {
-    icon: <CalenderIcon />,
+    icon: <CalendarIcon />,
     name: "Calendar",
     path: "/calendar",
   },
   {
-    icon: <DollarLineIcon />,
+    icon: <CreditCardIcon />,
     name: "Invoice",
     path: "/invoice",
   },
   {
-    icon: <TimeIcon />,
+    icon: <WatchIcon />,
     name: "Attendance",
     subItems: [
       { name: "Slots", path: "/attendance/slots" },
@@ -151,32 +155,32 @@ const navItems: NavItem[] = [
     path: "/contract-status",
   },
   {
-    icon: <GridIcon />,
+    icon: <MapIcon />,
     name: "Map",
     path: "/map",
   },
 ];
 
 const finderItems: NavItem[] = [
-  { name: "Non Pre-Schedule", icon: <ListIcon />, path: "/finder/non-pre-schedule" },
-  { name: "Backlog Finder", icon: <ListIcon />, path: "/finder/backlog" },
-  { name: "Followup Finder", icon: <ListIcon />, path: "/finder/followup" },
-  { name: "KIV Finder", icon: <ListIcon />, path: "/finder/kiv" },
-  { name: "Productivity Finder", icon: <ListIcon />, path: "/finder/productivity" },
+  { name: "Non Pre-Schedule", icon: <SearchIcon />, path: "/finder/non-pre-schedule" },
+  { name: "Backlog Finder", icon: <SearchIcon />, path: "/finder/backlog" },
+  { name: "Followup Finder", icon: <SearchIcon />, path: "/finder/followup" },
+  { name: "KIV Finder", icon: <SearchIcon />, path: "/finder/kiv" },
+  { name: "Productivity Finder", icon: <SearchIcon />, path: "/finder/productivity" },
 ];
 
 const reportItems: NavItem[] = [
   { name: "Service Summary Report", icon: <PieChartIcon />, path: "/reports/service-summary" },
-  { name: "RIC / Follow-up Report", icon: <PieChartIcon />, path: "/reports/ric-followup" },
-  { name: "Productivity Summary", icon: <PieChartIcon />, path: "/reports/productivity" },
-  { name: "SCDF Report", icon: <PieChartIcon />, path: "/reports/scdf" },
-  { name: "Sales Report", icon: <PieChartIcon />, path: "/reports/sales" },
-  { name: "Pest Trending", icon: <PieChartIcon />, path: "/reports/pest-trending" },
+  { name: "RIC / Follow-up Report", icon: <BarChartIcon />, path: "/reports/ric-followup" },
+  { name: "Productivity Summary", icon: <BarChartDollarIcon />, path: "/reports/productivity" },
+  { name: "SCDF Report", icon: <FileIcon />, path: "/reports/scdf" },
+  { name: "Sales Report", icon: <DollarIcon />, path: "/reports/sales" },
+  { name: "Pest Trending", icon: <TrendUpIcon />, path: "/reports/pest-trending" },
 ];
 
 const auditItems: NavItem[] = [
-  { name: "Customer Audit", icon: <DocsIcon />, path: "/audit/customer" },
-  { name: "Contracts Audit", icon: <DocsIcon />, path: "/audit/contracts" },
+  { name: "Customer Audit", icon: <ShieldIcon />, path: "/audit/customer" },
+  { name: "Contracts Audit", icon: <ShieldIcon />, path: "/audit/contracts" },
 ];
 
 const AppSidebar: React.FC = () => {
