@@ -90,20 +90,20 @@ export default function TaxPage() {
       };
       setTaxes([...taxes, newTax]);
     } else {
-      setTaxes(taxes.map(t => t.id === currentTax.id ? (currentTax as Tax) : t));
+      setTaxes(taxes.map((t: Tax) => t.id === currentTax.id ? (currentTax as Tax) : t));
     }
     setIsModalOpen(false);
   };
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this tax?")) {
-      setTaxes(taxes.filter(t => t.id !== id));
+      setTaxes(taxes.filter((t: Tax) => t.id !== id));
     }
   };
 
   // --- Filtered & Sorted Data ---
   const filteredData = useMemo(() => {
-    return taxes.filter(tax => 
+    return taxes.filter((tax: Tax) => 
       tax.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tax.value.toString().includes(searchTerm)
     );
@@ -190,7 +190,7 @@ export default function TaxPage() {
               <input
                 type="search"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 placeholder="Search tax name or value..."
                 className="w-full pl-4 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
@@ -236,7 +236,7 @@ export default function TaxPage() {
                 </TableHeader>
 
                 <TableBody className="divide-y divide-gray-50 dark:divide-white/[0.05]">
-                  {sortedData.map((tax, idx) => (
+                  {sortedData.map((tax: Tax, idx: number) => (
                     <TableRow key={tax.id} className="hover:bg-gray-50/10 transition-colors">
                       <TableCell className="px-5 py-4 text-start font-medium text-gray-400 text-theme-sm">
                         {idx + 1}
@@ -304,7 +304,7 @@ export default function TaxPage() {
             <Input 
               placeholder="e.g. VAT 10%" 
               value={currentTax.name}
-              onChange={(e) => setCurrentTax({...currentTax, name: e.target.value})}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentTax({...currentTax, name: e.target.value})}
             />
           </div>
 
@@ -314,7 +314,7 @@ export default function TaxPage() {
               type="number" 
               placeholder="e.g. 10" 
               value={currentTax.value}
-              onChange={(e) => setCurrentTax({...currentTax, value: Number(e.target.value)})}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentTax({...currentTax, value: Number(e.target.value)})}
             />
           </div>
 
@@ -322,7 +322,7 @@ export default function TaxPage() {
             <Label>Status</Label>
             <select 
               value={currentTax.status}
-              onChange={(e) => setCurrentTax({...currentTax, status: e.target.value as any})}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentTax({...currentTax, status: e.target.value as any})}
               className="w-full h-11 px-4 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500"
             >
               <option value="Active">Active</option>
