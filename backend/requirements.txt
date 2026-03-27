@@ -7,3 +7,6 @@ psycopg2-binary
 python-dotenv
 gunicorn
 whitenoise
+pandas
+openpyxl
+reportlab

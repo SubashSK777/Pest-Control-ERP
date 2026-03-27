@@ -144,7 +144,10 @@ export default function TaxPage() {
 
     // JS Logic to send to Python view for processing
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/crm/tax/export/`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const endpoint = `${apiUrl}/api/tax/export/`; // Use correct endpoint path
+        
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ format, data: exportData })
@@ -286,18 +289,18 @@ export default function TaxPage() {
           </div>
 
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between print-exclude">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-500">Show</span>
+            <div className="flex items-center gap-3 bg-gray-50/50 dark:bg-white/[0.02] px-4 py-2 rounded-xl border border-gray-100 dark:border-white/[0.05]">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Show</span>
               <select 
                 value={pageSize}
                 onChange={(e) => setPageSize(Number(e.target.value))}
-                className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[75px] text-center cursor-pointer appearance-none"
+                className="px-3 py-1 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.1] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px] text-center cursor-pointer appearance-none shadow-sm"
               >
                 {[10, 25, 50, 100].map((num) => (
                   <option key={num} value={num}>{num}</option>
                 ))}
               </select>
-              <span className="text-sm font-medium text-gray-500">entries</span>
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Entries</span>
             </div>
 
             <div className="relative w-full max-sm:max-w-none max-w-sm">
@@ -306,7 +309,7 @@ export default function TaxPage() {
                 value={searchTerm}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 placeholder="Search tax..."
-                className="w-full pl-4 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="w-full pl-4 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-sm transition-all"
               />
             </div>
           </div>
