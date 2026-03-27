@@ -240,9 +240,8 @@ export default function TaxPage() {
           </h2>
           <button 
             onClick={handleRefresh}
-            className="flex items-center justify-center gap-2 px-3 py-1.5 min-w-[100px] text-sm font-medium text-white transition-colors bg-brand-500 rounded-xl hover:bg-brand-600 group shadow-sm"
+            className="flex items-center justify-center px-3 py-1.5 min-w-[100px] text-sm font-medium text-white transition-colors bg-brand-500 rounded-xl hover:bg-brand-600 group shadow-sm"
           >
-            <i className="bi bi-arrow-clockwise text-lg"></i>
             Refresh
           </button>
         </div>
@@ -286,7 +285,8 @@ export default function TaxPage() {
           </div>
 
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between print-exclude">
-            <div className="flex items-center gap-3 px-4 py-2">
+            <div className="flex items-center gap-2 px-4 py-2">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">show</span>
               <div className="relative">
                 <button 
                   onClick={() => setIsPageSizeOpen(!isPageSizeOpen)}
@@ -307,6 +307,7 @@ export default function TaxPage() {
                     ))}
                 </Dropdown>
               </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">entries</span>
             </div>
 
             <div className="relative w-full max-sm:max-w-none max-w-sm">
