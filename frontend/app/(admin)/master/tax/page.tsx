@@ -12,15 +12,14 @@ import Badge from "@/components/ui/badge/Badge";
 import { 
   PencilIcon, 
   TrashBinIcon, 
-  RefreshIcon, 
   PlusIcon, 
   ChevronDownIcon,
-  AngleUpIcon,
-  AngleDownIcon
 } from "@/icons";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
 
 // --- Types ---
 interface Tax {
@@ -38,30 +37,37 @@ const initialData: Tax[] = [
   { id: 4, sNo: 4, name: "TX7", value: 7, status: "Active" },
 ];
 
+type SortDirection = 'asc' | 'desc' | 'default';
+
 export default function TaxPage() {
   const [taxes, setTaxes] = useState<Tax[]>(initialData);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Tax, direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Tax, direction: SortDirection }>({ key: 'id', direction: 'default' });
   
-  // Modal State
+  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
+  const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
+
+  // Dropdown States
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // --- Handlers ---
   const handleSort = (key: keyof Tax) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+    setSortConfig(prev => {
+      if (prev.key !== key) return { key, direction: 'asc' };
+      if (prev.direction === 'default') return { key, direction: 'asc' };
+      if (prev.direction === 'asc') return { key, direction: 'desc' };
+      return { key: 'id', direction: 'default' }; // Cycle back to recently added
+    });
   };
 
   const handleRefresh = () => {
-    // Simulate refresh by resetting to initial data or just re-setting current state
     setTaxes([...initialData]);
     setSearchTerm("");
-    setSortConfig(null);
+    setSortConfig({ key: 'id', direction: 'default' });
   };
 
   const openAddModal = () => {
@@ -85,7 +91,7 @@ export default function TaxPage() {
     if (modalMode === 'add') {
       const newTax: Tax = {
         ...currentTax as Tax,
-        id: taxes.length + 1,
+        id: Math.max(0, ...taxes.map(t => t.id)) + 1,
         sNo: taxes.length + 1,
       };
       setTaxes([...taxes, newTax]);
@@ -95,9 +101,16 @@ export default function TaxPage() {
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this tax?")) {
-      setTaxes(taxes.filter((t: Tax) => t.id !== id));
+  const confirmDelete = (id: number) => {
+    setTaxToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (taxToDelete !== null) {
+      setTaxes(taxes.filter((t: Tax) => t.id !== taxToDelete));
+      setIsDeleteModalOpen(false);
+      setTaxToDelete(null);
     }
   };
 
@@ -110,7 +123,9 @@ export default function TaxPage() {
   }, [taxes, searchTerm]);
 
   const sortedData = useMemo(() => {
-    if (!sortConfig) return filteredData;
+    if (sortConfig.direction === 'default') {
+      return [...filteredData].sort((a, b) => b.id - a.id); // Default: Recently Added (highest ID first)
+    }
     return [...filteredData].sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
@@ -122,15 +137,13 @@ export default function TaxPage() {
 
   // --- UI Helpers ---
   const SortIcon = ({ column }: { column: keyof Tax }) => {
-    const active = sortConfig?.key === column;
+    const active = sortConfig.key === column;
+    const direction = sortConfig.direction;
+    
     return (
       <div className="inline-flex flex-col ml-1 align-middle opacity-50 group-hover:opacity-100 transition-opacity">
-        <AngleUpIcon 
-          className={`w-2.5 h-2.5 fill-current ${active && sortConfig.direction === 'asc' ? 'text-brand-500' : ''}`} 
-        />
-        <AngleDownIcon 
-          className={`w-2.5 h-2.5 fill-current ${active && sortConfig.direction === 'desc' ? 'text-brand-500' : ''}`} 
-        />
+        <i className={`bi bi-caret-up-fill text-[8px] leading-[8px] ${active && direction === 'asc' ? 'text-brand-500' : ''}`}></i>
+        <i className={`bi bi-caret-down-fill text-[8px] leading-[8px] ${active && direction === 'desc' ? 'text-brand-500' : ''}`}></i>
       </div>
     );
   };
@@ -149,18 +162,28 @@ export default function TaxPage() {
             onClick={handleRefresh}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-brand-500 rounded-lg hover:bg-brand-600 group"
           >
-            <div className="flex items-center justify-center w-5 h-5 overflow-hidden">
-                <RefreshIcon className="w-6 h-6 fill-current scale-[0.7] transform-gpu" />
-            </div>
+            <i className="bi bi-arrow-clockwise text-lg leading-none"></i>
             Refresh
           </button>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.05]">
-            Export
-            <ChevronDownIcon className="w-4 h-4 fill-current" />
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsExportOpen(!isExportOpen)}
+              className="dropdown-toggle flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.05]"
+            >
+              Export
+              <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <Dropdown isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} className="w-[150px]">
+                <DropdownItem onClick={() => { setIsExportOpen(false); window.print(); }}>Print</DropdownItem>
+                <DropdownItem onClick={() => setIsExportOpen(false)}>CSV</DropdownItem>
+                <DropdownItem onClick={() => setIsExportOpen(false)}>Excel</DropdownItem>
+                <DropdownItem onClick={() => setIsExportOpen(false)}>PDF</DropdownItem>
+                <DropdownItem onClick={() => { setIsExportOpen(false); navigator.clipboard.writeText(JSON.stringify(sortedData)) }}>Copy</DropdownItem>
+            </Dropdown>
+          </div>
           
           <button 
             onClick={openAddModal}
@@ -178,7 +201,7 @@ export default function TaxPage() {
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-500">Show</span>
-              <select className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300">
+              <select className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px]">
                 {[10, 25, 50, 100].map((num) => (
                   <option key={num} value={num}>{num}</option>
                 ))}
@@ -202,8 +225,13 @@ export default function TaxPage() {
               <Table className="table-fixed min-w-[800px]">
                 <TableHeader className="border-b border-gray-50 dark:border-white/[0.05] bg-gray-50/50 dark:bg-white/[0.01]">
                   <TableRow>
-                    <TableCell isHeader className="w-[80px] px-5 py-3 font-bold text-gray-500 text-start text-xs dark:text-gray-400 uppercase tracking-wider">
+                    <TableCell 
+                      isHeader 
+                      onClick={() => handleSort('sNo')}
+                      className="w-[100px] px-5 py-3 font-bold text-gray-500 text-start text-xs dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-brand-500"
+                    >
                       S.NO
+                      <SortIcon column="sNo" />
                     </TableCell>
                     <TableCell isHeader className="w-[120px] px-5 py-3 font-bold text-gray-500 text-start text-xs dark:text-gray-400 uppercase tracking-wider">
                       ACTIONS
@@ -239,7 +267,7 @@ export default function TaxPage() {
                   {sortedData.map((tax: Tax, idx: number) => (
                     <TableRow key={tax.id} className="hover:bg-gray-50/10 transition-colors">
                       <TableCell className="px-5 py-4 text-start font-medium text-gray-400 text-theme-sm">
-                        {idx + 1}
+                        {tax.sNo}
                       </TableCell>
                       <TableCell className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -250,7 +278,7 @@ export default function TaxPage() {
                             <PencilIcon className="w-5 h-5 fill-current" />
                           </button>
                           <button 
-                            onClick={() => handleDelete(tax.id)}
+                            onClick={() => confirmDelete(tax.id)}
                             className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-400"
                           >
                             <TrashBinIcon className="w-5 h-5 fill-current" />
@@ -323,7 +351,7 @@ export default function TaxPage() {
             <select 
               value={currentTax.status}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentTax({...currentTax, status: e.target.value as any})}
-              className="w-full h-11 px-4 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              className="w-full h-11 px-4 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 outline-none"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -343,6 +371,40 @@ export default function TaxPage() {
             className="px-6 py-2.5 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600"
           >
             {modalMode === 'add' ? 'Save Tax' : 'Update Tax'}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)}
+        className="max-w-[400px] p-6 text-center"
+      >
+        <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-error-50 dark:bg-error-500/10 text-error-500">
+                <i className="bi bi-exclamation-triangle text-3xl"></i>
+            </div>
+        </div>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">
+            Confirm Delete
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+            Are you sure you want to delete this tax record? This action cannot be undone.
+        </p>
+
+        <div className="flex items-center justify-center gap-3">
+          <button 
+            onClick={() => setIsDeleteModalOpen(false)}
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10"
+          >
+            No, Keep it
+          </button>
+          <button 
+            onClick={handleDelete}
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-error-500 rounded-lg hover:bg-error-600"
+          >
+            Yes, Delete
           </button>
         </div>
       </Modal>
