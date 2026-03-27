@@ -50,16 +50,18 @@ export default function TaxPage() {
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
   const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
 
   // Dropdown States
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isPageSizeOpen, setIsPageSizeOpen] = useState(false);
 
   // --- Handlers ---
   const handleSort = (key: keyof Tax) => {
-    setSortConfig(prev => {
+    setSortConfig((prev: { key: keyof Tax, direction: SortDirection }) => {
       if (prev.key !== key) return { key, direction: 'asc' };
       if (prev.direction === 'default') return { key, direction: 'asc' };
       if (prev.direction === 'asc') return { key, direction: 'desc' };
@@ -94,7 +96,7 @@ export default function TaxPage() {
     if (modalMode === 'add') {
       const newTax: Tax = {
         ...currentTax as Tax,
-        id: Math.max(0, ...taxes.map(t => t.id)) + 1,
+        id: Math.max(0, ...taxes.map((t: Tax) => t.id)) + 1,
         sNo: taxes.length + 1,
       };
       setTaxes([...taxes, newTax]);
@@ -118,57 +120,52 @@ export default function TaxPage() {
   };
 
   // --- Export Logic ---
-  const handleExport = async (format: 'print' | 'csv' | 'excel' | 'pdf' | 'copy') => {
+  const handleExport = (format: 'print' | 'csv' | 'excel' | 'pdf' | 'copy') => {
     setIsExportOpen(false);
     
     // Define headers and structure
     const headers = ["S.No", "Tax Name", "Tax %", "Status"];
-    const exportData = sortedData.map(t => ({
+    const exportData = sortedData.map((t: Tax) => ({
       "S.No": t.sNo,
       "Tax Name": t.name,
       "Tax %": t.value,
       "Status": t.status
     }));
 
-    if (format === 'print') {
+    if (format === 'print' || format === 'pdf') {
         window.print();
         return;
     }
     
     if (format === 'copy') {
-        const text = exportData.map(t => Object.values(t).join('\t')).join('\n');
-        navigator.clipboard.writeText(`${headers.join('\t')}\n${text}`);
+        const text = [headers.join('\t'), ...exportData.map((t: any) => Object.values(t).join('\t'))].join('\n');
+        navigator.clipboard.writeText(text);
         alert("Table content copied to clipboard!");
         return;
     }
 
-    // JS Logic to send to Python view for processing
-    try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const endpoint = `${apiUrl}/api/tax/export/`; // Use correct endpoint path
+    if (format === 'csv' || format === 'excel') {
+        const separator = format === 'csv' ? ',' : '\t';
+        const fileExtension = format === 'csv' ? 'csv' : 'xls';
+        const mimeType = format === 'csv' ? 'text/csv;charset=utf-8;' : 'application/vnd.ms-excel';
         
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ format, data: exportData })
-        });
-        
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `tax_report_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : format === 'pdf' ? 'pdf' : format}`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } else {
-            console.error("Export Error Response:", await response.text());
-            alert("Export failed on server.");
-        }
-    } catch (err) {
-        console.error("Export Connectivity Error:", err);
-        alert("Failed to connect to export server.");
+        // CSV/Excel Content Creation
+        const csvContent = [
+            headers.join(separator),
+            ...exportData.map((row: any) => 
+                Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(separator)
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `tax_report_${new Date().getTime()}.${fileExtension}`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
   };
 
@@ -260,11 +257,11 @@ export default function TaxPage() {
               <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
             <Dropdown isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} className="w-[120px] rounded-2xl shadow-xl border-white/[0.05]">
-                <DropdownItem onClick={() => handleExport('print')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">Print</DropdownItem>
-                <DropdownItem onClick={() => handleExport('csv')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">CSV</DropdownItem>
-                <DropdownItem onClick={() => handleExport('excel')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">Excel</DropdownItem>
-                <DropdownItem onClick={() => handleExport('pdf')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">PDF</DropdownItem>
-                <DropdownItem onClick={() => handleExport('copy')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 border-t border-gray-100 dark:border-white/5 mt-1">Copy</DropdownItem>
+                <DropdownItem onClick={() => handleExport('print')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0">Print</DropdownItem>
+                <DropdownItem onClick={() => handleExport('csv')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0">CSV</DropdownItem>
+                <DropdownItem onClick={() => handleExport('excel')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0">Excel</DropdownItem>
+                <DropdownItem onClick={() => handleExport('pdf')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0">PDF</DropdownItem>
+                <DropdownItem onClick={() => handleExport('copy')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 border-t border-gray-100 dark:border-white/5 mt-1 px-0">Copy</DropdownItem>
             </Dropdown>
           </div>
           
@@ -289,18 +286,27 @@ export default function TaxPage() {
           </div>
 
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between print-exclude">
-            <div className="flex items-center gap-3 bg-gray-50/50 dark:bg-white/[0.02] px-4 py-2 rounded-xl border border-gray-100 dark:border-white/[0.05]">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Show</span>
-              <select 
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="px-3 py-1 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.1] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px] text-center cursor-pointer appearance-none shadow-sm"
-              >
-                {[10, 25, 50, 100].map((num) => (
-                  <option key={num} value={num}>{num}</option>
-                ))}
-              </select>
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Entries</span>
+            <div className="flex items-center gap-3 px-4 py-2">
+              <div className="relative">
+                <button 
+                  onClick={() => setIsPageSizeOpen(!isPageSizeOpen)}
+                  className="flex items-center justify-center gap-2 px-3 py-1.5 min-w-[70px] text-sm bg-white border border-gray-200 rounded-xl text-gray-700 dark:bg-gray-900 dark:border-white/[0.1] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 shadow-sm transition-all text-center cursor-pointer font-bold"
+                >
+                  {pageSize}
+                  <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isPageSizeOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <Dropdown isOpen={isPageSizeOpen} onClose={() => setIsPageSizeOpen(false)} className="w-[70px] rounded-2xl shadow-xl border-white/[0.1] right-auto left-0 overflow-hidden">
+                    {[10, 25, 50, 100].map((num) => (
+                      <DropdownItem 
+                        key={num} 
+                        onClick={() => { setPageSize(num); setIsPageSizeOpen(false); }} 
+                        className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0 font-bold"
+                      >
+                        {num}
+                      </DropdownItem>
+                    ))}
+                </Dropdown>
+              </div>
             </div>
 
             <div className="relative w-full max-sm:max-w-none max-w-sm">
@@ -419,7 +425,7 @@ export default function TaxPage() {
           </h3>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+        <form onSubmit={(e: React.FormEvent) => { e.preventDefault(); handleSave(); }} className="space-y-6">
           <div>
             <Label>Name <span className="text-rose-500">*</span></Label>
             <Input 
@@ -441,14 +447,27 @@ export default function TaxPage() {
 
           <div>
             <Label>Status</Label>
-            <select 
-              value={currentTax.status}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentTax({...currentTax, status: e.target.value as any})}
-              className="w-full h-11 px-4 text-sm bg-theme-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 outline-none cursor-pointer"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+            <div className="relative">
+                <button 
+                  type="button"
+                  onClick={() => setIsStatusOpen(!isStatusOpen)}
+                  className="flex items-center justify-between w-full h-11 px-4 text-sm bg-theme-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 outline-none cursor-pointer"
+                >
+                  {currentTax.status}
+                  <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isStatusOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <Dropdown isOpen={isStatusOpen} onClose={() => setIsStatusOpen(false)} className="w-full rounded-xl shadow-xl border-white/[0.1] right-0 left-0 overflow-hidden mt-1">
+                    {["Active", "Inactive"].map((status) => (
+                      <DropdownItem 
+                        key={status} 
+                        onClick={() => { setCurrentTax({...currentTax, status: status as any}); setIsStatusOpen(false); }} 
+                        className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 px-0"
+                      >
+                        {status}
+                      </DropdownItem>
+                    ))}
+                </Dropdown>
+            </div>
           </div>
 
           <div className="mt-8 flex items-center justify-end gap-3">
