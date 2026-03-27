@@ -42,12 +42,36 @@ class TaxExportView(views.APIView):
                 return response
             
             elif format_type == 'pdf':
-                # Simplified PDF as CSV for now because reportlab/xhtml2pdf is not in environment
-                # In production, recommend installing reportlab.
-                output = io.StringIO()
-                df.to_csv(output, index=False)
-                response = HttpResponse(output.getvalue(), content_type='text/csv')
-                response['Content-Disposition'] = 'attachment; filename=tax_report_converted.csv'
+                from reportlab.lib import colors
+                from reportlab.lib.pagesizes import letter
+                from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+                from reportlab.lib.styles import getSampleStyleSheet
+                
+                output = io.BytesIO()
+                doc = SimpleDocTemplate(output, pagesize=letter)
+                elements = []
+                
+                # Title
+                styles = getSampleStyleSheet()
+                elements.append(Paragraph("A-Flick Pest Control ERP - Tax Master List", styles['Title']))
+                
+                # Table Data
+                table_data = [df.columns.tolist()] + df.values.tolist()
+                t = Table(table_data)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0,0), (-1,-1), 1, colors.black)
+                ]))
+                elements.append(t)
+                doc.build(elements)
+                
+                response = HttpResponse(output.getvalue(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename=tax_report.pdf'
                 return response
                 
             return Response({"error": "Unsupported format"}, status=400)

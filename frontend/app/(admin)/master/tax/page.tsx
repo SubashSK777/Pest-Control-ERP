@@ -14,6 +14,8 @@ import {
   TrashBinIcon, 
   PlusIcon, 
   ChevronDownIcon,
+  AngleUpIcon,
+  AngleDownIcon,
 } from "@/icons";
 import { Modal } from "@/components/ui/modal";
 import Label from "@/components/form/Label";
@@ -118,6 +120,9 @@ export default function TaxPage() {
   // --- Export Logic ---
   const handleExport = async (format: 'print' | 'csv' | 'excel' | 'pdf' | 'copy') => {
     setIsExportOpen(false);
+    
+    // Define headers and structure
+    const headers = ["S.No", "Tax Name", "Tax %", "Status"];
     const exportData = sortedData.map(t => ({
       "S.No": t.sNo,
       "Tax Name": t.name,
@@ -131,12 +136,13 @@ export default function TaxPage() {
     }
     
     if (format === 'copy') {
-        navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
-        alert("Copied to clipboard!");
+        const text = exportData.map(t => Object.values(t).join('\t')).join('\n');
+        navigator.clipboard.writeText(`${headers.join('\t')}\n${text}`);
+        alert("Table content copied to clipboard!");
         return;
     }
 
-    // Logic for Excel, CSV, PDF - Sending to Python View
+    // JS Logic to send to Python view for processing
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/crm/tax/export/`, {
             method: 'POST',
@@ -149,15 +155,16 @@ export default function TaxPage() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `tax_report_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : format}`;
+            a.download = `tax_report_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : format === 'pdf' ? 'pdf' : format}`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
         } else {
-            alert("Export failed on server. Ensure backend export endpoint is available.");
+            console.error("Export Error Response:", await response.text());
+            alert("Export failed on server.");
         }
     } catch (err) {
-        console.error("Export Error:", err);
+        console.error("Export Connectivity Error:", err);
         alert("Failed to connect to export server.");
     }
   };
@@ -194,8 +201,8 @@ export default function TaxPage() {
     
     return (
       <div className="inline-flex flex-col ml-1 align-middle opacity-50 group-hover:opacity-100 transition-opacity">
-        <i className={`bi bi-caret-up-fill text-[8px] leading-[8px] ${active && direction === 'asc' ? 'text-brand-500' : ''}`}></i>
-        <i className={`bi bi-caret-down-fill text-[8px] leading-[8px] ${active && direction === 'desc' ? 'text-brand-500' : ''}`}></i>
+        <AngleUpIcon className={`w-2.5 h-2.5 fill-current ${active && direction === 'asc' ? 'text-brand-500' : ''}`} />
+        <AngleDownIcon className={`w-2.5 h-2.5 fill-current ${active && direction === 'desc' ? 'text-brand-500' : ''}`} />
       </div>
     );
   };
@@ -216,9 +223,9 @@ export default function TaxPage() {
                 padding: 20px;
             }
             #printable-area .print-exclude { display: none !important; }
-            .print-header { display: block !important; margin-bottom: 20px; }
+            .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
             table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 10pt; }
             tr { page-break-inside: avoid; }
         }
       `}</style>
@@ -233,7 +240,7 @@ export default function TaxPage() {
           </h2>
           <button 
             onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-brand-500 rounded-lg hover:bg-brand-600 group"
+            className="flex items-center justify-center gap-2 px-3 py-1.5 min-w-[100px] text-sm font-medium text-white transition-colors bg-brand-500 rounded-xl hover:bg-brand-600 group shadow-sm"
           >
             <i className="bi bi-arrow-clockwise text-lg"></i>
             Refresh
@@ -244,23 +251,23 @@ export default function TaxPage() {
           <div className="relative">
             <button 
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="dropdown-toggle flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.05]"
+              className="flex items-center justify-center gap-2 px-3 py-1.5 min-w-[100px] text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-xl hover:bg-gray-50 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.05] shadow-sm"
             >
               Export
               <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
-            <Dropdown isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} className="w-[150px]">
-                <DropdownItem onClick={() => handleExport('print')}>Print</DropdownItem>
-                <DropdownItem onClick={() => handleExport('csv')}>CSV</DropdownItem>
-                <DropdownItem onClick={() => handleExport('excel')}>Excel</DropdownItem>
-                <DropdownItem onClick={() => handleExport('pdf')}>PDF</DropdownItem>
-                <DropdownItem onClick={() => handleExport('copy')}>Copy</DropdownItem>
+            <Dropdown isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} className="w-[120px] rounded-2xl shadow-xl border-white/[0.05]">
+                <DropdownItem onClick={() => handleExport('print')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">Print</DropdownItem>
+                <DropdownItem onClick={() => handleExport('csv')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">CSV</DropdownItem>
+                <DropdownItem onClick={() => handleExport('excel')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">Excel</DropdownItem>
+                <DropdownItem onClick={() => handleExport('pdf')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20">PDF</DropdownItem>
+                <DropdownItem onClick={() => handleExport('copy')} className="justify-center text-center hover:bg-brand-500/10 dark:hover:bg-brand-500/20 border-t border-gray-100 dark:border-white/5 mt-1">Copy</DropdownItem>
             </Dropdown>
           </div>
           
           <button 
             onClick={openAddModal}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-brand-500 rounded-lg hover:bg-brand-600"
+            className="flex items-center justify-center gap-2 px-4 py-1.5 text-sm font-medium text-white transition-colors bg-brand-500 rounded-xl hover:bg-brand-600 shadow-sm"
           >
             <PlusIcon className="w-4 h-4 fill-current" />
             Add Tax
@@ -273,11 +280,9 @@ export default function TaxPage() {
           
           {/* Print Only Header */}
           <div className="hidden print-header">
-            <div className="flex items-center justify-between mb-2">
-                <h1 className="text-2xl font-bold text-gray-900 uppercase">A-Flick Pest Control ERP</h1>
-                <p className="text-sm font-medium text-gray-600">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
-            </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Tax Master List</h2>
+            <h1 className="text-2xl font-bold text-gray-900 uppercase">A-Flick Pest Control ERP</h1>
+            <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Tax Master List</h2>
+            <p className="text-sm font-medium text-gray-600 mt-2">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
           </div>
 
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between print-exclude">
@@ -286,7 +291,7 @@ export default function TaxPage() {
               <select 
                 value={pageSize}
                 onChange={(e) => setPageSize(Number(e.target.value))}
-                className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px] cursor-pointer"
+                className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[75px] text-center cursor-pointer appearance-none"
               >
                 {[10, 25, 50, 100].map((num) => (
                   <option key={num} value={num}>{num}</option>
@@ -300,7 +305,7 @@ export default function TaxPage() {
                 type="search"
                 value={searchTerm}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                placeholder="Search tax name or value..."
+                placeholder="Search tax..."
                 className="w-full pl-4 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
             </div>
@@ -395,7 +400,6 @@ export default function TaxPage() {
             <div className="text-sm font-medium text-gray-500">
               Showing 1 to {displayData.length} of {sortedData.length} entries
             </div>
-            {/* Pagination UI - Placeholder */}
           </div>
         </div>
       </div>
@@ -412,7 +416,7 @@ export default function TaxPage() {
           </h3>
         </div>
 
-        <div className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
           <div>
             <Label>Name <span className="text-rose-500">*</span></Label>
             <Input 
@@ -437,28 +441,29 @@ export default function TaxPage() {
             <select 
               value={currentTax.status}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentTax({...currentTax, status: e.target.value as any})}
-              className="w-full h-11 px-4 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 outline-none"
+              className="w-full h-11 px-4 text-sm bg-theme-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-brand-500 outline-none cursor-pointer"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
           </div>
-        </div>
 
-        <div className="mt-8 flex items-center justify-end gap-3">
-          <button 
-            onClick={() => setIsModalOpen(false)}
-            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={handleSave}
-            className="px-6 py-2.5 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600"
-          >
-            {modalMode === 'add' ? 'Save Tax' : 'Update Tax'}
-          </button>
-        </div>
+          <div className="mt-8 flex items-center justify-end gap-3">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              className="px-6 py-2.5 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 shadow-md"
+            >
+              {modalMode === 'add' ? 'Save Tax' : 'Update Tax'}
+            </button>
+          </div>
+        </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}
@@ -472,10 +477,10 @@ export default function TaxPage() {
                 <i className="bi bi-exclamation-triangle text-3xl"></i>
             </div>
         </div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white/90 mb-2 font-outfit">
             Confirm Delete
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 px-4">
             Are you sure you want to delete this tax record? This action cannot be undone.
         </p>
 
