@@ -1,11 +1,6 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-import dj_database_url
-
-load_dotenv()
-
+import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(os.path.join(BASE_DIR, 'apps'))
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-aflick-v1')
 
@@ -39,7 +34,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'aflick_crm.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -57,7 +52,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'aflick_crm.wsgi'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(

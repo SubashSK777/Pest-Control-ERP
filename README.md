@@ -1,7 +1,5 @@
 # 🧪 Pest-Control-ERP: The Modern Pest Management Solution
 
-![Pest Control ERP Banner](./banner.png)
-
 A comprehensive, cloud-native Enterprise Resource Planning (ERP) platform designed specifically for the pest control industry. Built with high performance and visual excellence to empower businesses with real-time operations, scheduling, and customer management.
 
 ---
@@ -33,52 +31,39 @@ Built using the most modern and performant web technologies:
 
 ## 📦 Installation
 
-### Prerequisites
+### Frontend Setup (Next.js)
+1.  **Navigate to Frontend**: `cd frontend`
+2.  **Install Dependencies**: `npm install`
+3.  **Launch Dev Server**: `npm run dev`
 
-Ensure you have **Node.js 18.x** or later (Node.js 20+ recommended) installed.
-
-### Setup
-
-1.  **Clone the Repository**:
-    ```bash
-    git clone [your-repo-url]
-    cd Pest-Control-ERP
-    ```
-
-2.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-
-3.  **Environment Configuration**:
-    Create a `.env.local` file in the root directory and add your necessary configuration variables.
-
-4.  **Launch the Development Server**:
-    ```bash
-    npm run dev
-    ```
-
-5.  **Build for Production**:
-    ```bash
-    npm run build
-    npm run start
-    ```
+### Backend Setup (Django)
+1.  **Navigate to Backend**: `cd backend`
+2.  **Install Requirements**: `pip install -r requirements.txt`
+3.  **Run Migrations**: `python manage.py migrate`
+4.  **Start Server**: `python manage.py runserver`
 
 ---
 
 ## 📂 Project Structure
 
-```text
-├── src/
-│   ├── components/     # Reusable UI components (Charts, Modals, Forms)
-│   ├── app/            # Next.js App Router (Pages and Layouts)
-│   ├── css/            # Global and Tailwind styles
-│   └── hooks/          # Custom React hooks
-├── backend/            # Backend API and database logic
-├── public/             # Static assets (images, icons)
-├── package.json        # Dependencies and scripts
-└── tsconfig.json       # TypeScript configuration
-```
+### ⚛️ Frontend (`/frontend`)
+*   `/app` - Next.js App Router (pages and layouts)
+*   `/components` - Generic reusable UI components
+*   `/features` - Feature-based grouping (Auth, User, Dashboard)
+*   `/lib` - Utility functions and helpers
+*   `/styles` - Global CSS and design tokens
+*   `/hooks` - Custom React hooks
+
+### 🐍 Backend (`/backend`)
+*   `/config` - Django project settings and base URLs
+*   `/apps` - Modular Django applications (authentication, crm)
+*   `/services` - Pure business logic (separation from views)
+*   `/api` - DRF views and REST endpoints
+
+### 🐘 Database (`/db`)
+*   `/migrations` - SQL schema migrations
+*   `crm_schema.sql` - Initial database schema
+*   `seed.sql` - Demo data seed scripts
 
 ---
 
