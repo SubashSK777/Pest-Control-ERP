@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import {
   Table,
@@ -43,6 +43,7 @@ export default function TaxPage() {
   const [taxes, setTaxes] = useState<Tax[]>(initialData);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof Tax, direction: SortDirection }>({ key: 'id', direction: 'default' });
+  const [pageSize, setPageSize] = useState(10);
   
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,7 +61,7 @@ export default function TaxPage() {
       if (prev.key !== key) return { key, direction: 'asc' };
       if (prev.direction === 'default') return { key, direction: 'asc' };
       if (prev.direction === 'asc') return { key, direction: 'desc' };
-      return { key: 'id', direction: 'default' }; // Cycle back to recently added
+      return { key: 'id', direction: 'default' }; 
     });
   };
 
@@ -114,6 +115,53 @@ export default function TaxPage() {
     }
   };
 
+  // --- Export Logic ---
+  const handleExport = async (format: 'print' | 'csv' | 'excel' | 'pdf' | 'copy') => {
+    setIsExportOpen(false);
+    const exportData = sortedData.map(t => ({
+      "S.No": t.sNo,
+      "Tax Name": t.name,
+      "Tax %": t.value,
+      "Status": t.status
+    }));
+
+    if (format === 'print') {
+        window.print();
+        return;
+    }
+    
+    if (format === 'copy') {
+        navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
+        alert("Copied to clipboard!");
+        return;
+    }
+
+    // Logic for Excel, CSV, PDF - Sending to Python View
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/crm/tax/export/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ format, data: exportData })
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tax_report_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } else {
+            alert("Export failed on server. Ensure backend export endpoint is available.");
+        }
+    } catch (err) {
+        console.error("Export Error:", err);
+        alert("Failed to connect to export server.");
+    }
+  };
+
   // --- Filtered & Sorted Data ---
   const filteredData = useMemo(() => {
     return taxes.filter((tax: Tax) => 
@@ -124,7 +172,7 @@ export default function TaxPage() {
 
   const sortedData = useMemo(() => {
     if (sortConfig.direction === 'default') {
-      return [...filteredData].sort((a, b) => b.id - a.id); // Default: Recently Added (highest ID first)
+      return [...filteredData].sort((a, b) => b.id - a.id); 
     }
     return [...filteredData].sort((a, b) => {
       const aVal = a[sortConfig.key];
@@ -134,6 +182,10 @@ export default function TaxPage() {
       return 0;
     });
   }, [filteredData, sortConfig]);
+
+  const displayData = useMemo(() => {
+    return sortedData.slice(0, pageSize);
+  }, [sortedData, pageSize]);
 
   // --- UI Helpers ---
   const SortIcon = ({ column }: { column: keyof Tax }) => {
@@ -150,10 +202,31 @@ export default function TaxPage() {
 
   return (
     <div className="w-full">
+      {/* Print-only CSS */}
+      <style>{`
+        @media print {
+            body * { visibility: hidden; }
+            #printable-area, #printable-area * { visibility: visible; }
+            #printable-area { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                background: white !important;
+                padding: 20px;
+            }
+            #printable-area .print-exclude { display: none !important; }
+            .print-header { display: block !important; margin-bottom: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+            tr { page-break-inside: avoid; }
+        }
+      `}</style>
+
       <PageBreadcrumb pageTitle="Tax" />
 
       {/* Page Header / Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 print:hidden">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
             Tax
@@ -162,7 +235,7 @@ export default function TaxPage() {
             onClick={handleRefresh}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-brand-500 rounded-lg hover:bg-brand-600 group"
           >
-            <i className="bi bi-arrow-clockwise text-lg leading-none"></i>
+            <i className="bi bi-arrow-clockwise text-lg"></i>
             Refresh
           </button>
         </div>
@@ -177,11 +250,11 @@ export default function TaxPage() {
               <ChevronDownIcon className={`w-4 h-4 fill-current transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
             <Dropdown isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} className="w-[150px]">
-                <DropdownItem onClick={() => { setIsExportOpen(false); window.print(); }}>Print</DropdownItem>
-                <DropdownItem onClick={() => setIsExportOpen(false)}>CSV</DropdownItem>
-                <DropdownItem onClick={() => setIsExportOpen(false)}>Excel</DropdownItem>
-                <DropdownItem onClick={() => setIsExportOpen(false)}>PDF</DropdownItem>
-                <DropdownItem onClick={() => { setIsExportOpen(false); navigator.clipboard.writeText(JSON.stringify(sortedData)) }}>Copy</DropdownItem>
+                <DropdownItem onClick={() => handleExport('print')}>Print</DropdownItem>
+                <DropdownItem onClick={() => handleExport('csv')}>CSV</DropdownItem>
+                <DropdownItem onClick={() => handleExport('excel')}>Excel</DropdownItem>
+                <DropdownItem onClick={() => handleExport('pdf')}>PDF</DropdownItem>
+                <DropdownItem onClick={() => handleExport('copy')}>Copy</DropdownItem>
             </Dropdown>
           </div>
           
@@ -196,12 +269,25 @@ export default function TaxPage() {
       </div>
 
       <div className="space-y-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div id="printable-area" className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
           
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+          {/* Print Only Header */}
+          <div className="hidden print-header">
+            <div className="flex items-center justify-between mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 uppercase">A-Flick Pest Control ERP</h1>
+                <p className="text-sm font-medium text-gray-600">{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Tax Master List</h2>
+          </div>
+
+          <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between print-exclude">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-500">Show</span>
-              <select className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px]">
+              <select 
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-xl text-gray-700 dark:bg-gray-900 dark:border-white/[0.05] dark:text-gray-300 outline-none focus:ring-1 focus:ring-brand-500 min-w-[70px] cursor-pointer"
+              >
                 {[10, 25, 50, 100].map((num) => (
                   <option key={num} value={num}>{num}</option>
                 ))}
@@ -209,7 +295,7 @@ export default function TaxPage() {
               <span className="text-sm font-medium text-gray-500">entries</span>
             </div>
 
-            <div className="relative w-full max-w-sm">
+            <div className="relative w-full max-sm:max-w-none max-w-sm">
               <input
                 type="search"
                 value={searchTerm}
@@ -222,7 +308,7 @@ export default function TaxPage() {
 
           <div className="overflow-hidden rounded-xl border border-gray-100 bg-white dark:border-white/[0.05] dark:bg-white/[0.02]">
             <div className="max-w-full overflow-x-auto">
-              <Table className="table-fixed min-w-[800px]">
+              <Table className="table-fixed min-w-[800px] border-collapse">
                 <TableHeader className="border-b border-gray-50 dark:border-white/[0.05] bg-gray-50/50 dark:bg-white/[0.01]">
                   <TableRow>
                     <TableCell 
@@ -233,7 +319,7 @@ export default function TaxPage() {
                       S.NO
                       <SortIcon column="sNo" />
                     </TableCell>
-                    <TableCell isHeader className="w-[120px] px-5 py-3 font-bold text-gray-500 text-start text-xs dark:text-gray-400 uppercase tracking-wider">
+                    <TableCell isHeader className="w-[120px] px-5 py-3 font-bold text-gray-500 text-start text-xs dark:text-gray-400 uppercase tracking-wider print-exclude">
                       ACTIONS
                     </TableCell>
                     <TableCell 
@@ -264,12 +350,12 @@ export default function TaxPage() {
                 </TableHeader>
 
                 <TableBody className="divide-y divide-gray-50 dark:divide-white/[0.05]">
-                  {sortedData.map((tax: Tax, idx: number) => (
+                  {displayData.map((tax: Tax) => (
                     <TableRow key={tax.id} className="hover:bg-gray-50/10 transition-colors">
                       <TableCell className="px-5 py-4 text-start font-medium text-gray-400 text-theme-sm">
                         {tax.sNo}
                       </TableCell>
-                      <TableCell className="px-5 py-4">
+                      <TableCell className="px-5 py-4 print-exclude">
                         <div className="flex items-center gap-3">
                           <button 
                             onClick={() => openEditModal(tax)}
@@ -305,11 +391,11 @@ export default function TaxPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 mt-8 sm:flex-row sm:items-center sm:justify-between px-2">
+          <div className="flex flex-col gap-4 mt-8 sm:flex-row sm:items-center sm:justify-between px-2 print-exclude">
             <div className="text-sm font-medium text-gray-500">
-              Showing 1 to {sortedData.length} of {sortedData.length} entries
+              Showing 1 to {displayData.length} of {sortedData.length} entries
             </div>
-            {/* Pagination UI - Placeholder for now */}
+            {/* Pagination UI - Placeholder */}
           </div>
         </div>
       </div>
