@@ -380,45 +380,16 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex  ${
+        className={`py-8 flex items-center ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                src="/images/logo/logo-light-full.png"
-                alt="Logo"
-                width={160}
-                height={50}
-                className="dark:hidden"
-              />
-              <Image
-                src="/images/logo/logo-dark-full.png"
-                alt="Logo"
-                width={160}
-                height={50}
-                className="hidden dark:block"
-              />
-            </>
-          ) : (
-            <>
-              <Image
-                src="/images/logo/logo-light-icon.png"
-                alt="Logo"
-                width={35}
-                height={35}
-                className="dark:hidden"
-              />
-              <Image
-                src="/images/logo/logo-dark-icon.png"
-                alt="Logo"
-                width={35}
-                height={35}
-                className="hidden dark:block"
-              />
-            </>
+        <Link href="/" className="flex items-center gap-3">
+          <i className="bi bi-bug-fill text-brand-500 text-3xl"></i>
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
+              A-Flick
+            </span>
           )}
         </Link>
       </div>
