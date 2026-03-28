@@ -42,24 +42,40 @@ const initialData: Tax[] = [
 type SortDirection = 'asc' | 'desc' | 'default';
 
 export default function TaxPage() {
-  const [taxes, setTaxes] = useState<Tax[]>(initialData);
+  const [taxes, setTaxes] = useState<Tax[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof Tax, direction: SortDirection }>({ key: 'id', direction: 'default' });
   const [pageSize, setPageSize] = useState(10);
   
-  // Modal States
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isStatusOpen, setIsStatusOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
-  const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://pest-control-erp.onrender.com";
 
-  // Dropdown States
-  const [isExportOpen, setIsExportOpen] = useState(false);
-  const [isPageSizeOpen, setIsPageSizeOpen] = useState(false);
+  const fetchTaxes = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${BACKEND_URL}/api/taxes/`);
+      if (!res.ok) throw new Error("Failed to fetch taxes");
+      const data = await res.json();
+      
+      const mappedData: Tax[] = data.map((t: any, index: number) => ({
+        id: t.id,
+        sNo: index + 1,
+        name: t.name,
+        value: Number(t.tax_value),
+        status: t.status ? "Active" : "Inactive"
+      }));
+      setTaxes(mappedData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // --- Handlers ---
+  useEffect(() => {
+    fetchTaxes();
+  }, []);
+
   const handleSort = (key: keyof Tax) => {
     setSortConfig((prev: { key: keyof Tax, direction: SortDirection }) => {
       if (prev.key !== key) return { key, direction: 'asc' };
@@ -70,7 +86,7 @@ export default function TaxPage() {
   };
 
   const handleRefresh = () => {
-    setTaxes([...initialData]);
+    fetchTaxes();
     setSearchTerm("");
     setSortConfig({ key: 'id', direction: 'default' });
   };
@@ -87,23 +103,36 @@ export default function TaxPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!currentTax.name || currentTax.value === undefined) {
       alert("Name and Tax (%) are compulsory.");
       return;
     }
 
-    if (modalMode === 'add') {
-      const newTax: Tax = {
-        ...currentTax as Tax,
-        id: Math.max(0, ...taxes.map((t: Tax) => t.id)) + 1,
-        sNo: taxes.length + 1,
-      };
-      setTaxes([...taxes, newTax]);
-    } else {
-      setTaxes(taxes.map((t: Tax) => t.id === currentTax.id ? (currentTax as Tax) : t));
+    const payload = {
+      name: currentTax.name,
+      tax_value: currentTax.value,
+      status: currentTax.status === 'Active',
+      description: "" // Optional but required by model if not specified
+    };
+
+    try {
+      const method = modalMode === 'add' ? 'POST' : 'PUT';
+      const endpoint = modalMode === 'add' ? `${BACKEND_URL}/api/taxes/` : `${BACKEND_URL}/api/taxes/${currentTax.id}/`;
+      
+      const res = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error("Could not save tax");
+      
+      setIsModalOpen(false);
+      fetchTaxes();
+    } catch (err) {
+      alert("Failed to save tax");
     }
-    setIsModalOpen(false);
   };
 
   const confirmDelete = (id: number) => {
@@ -111,11 +140,20 @@ export default function TaxPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (taxToDelete !== null) {
-      setTaxes(taxes.filter((t: Tax) => t.id !== taxToDelete));
-      setIsDeleteModalOpen(false);
-      setTaxToDelete(null);
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/taxes/${taxToDelete}/`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) throw new Error("Could not delete tax");
+        
+        setIsDeleteModalOpen(false);
+        setTaxToDelete(null);
+        fetchTaxes();
+      } catch (err) {
+        alert("Failed to delete tax");
+      }
     }
   };
 
@@ -268,7 +306,7 @@ export default function TaxPage() {
             onClick={openAddModal}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-brand-500 rounded-xl hover:bg-brand-600 shadow-sm"
           >
-            <PlusIcon className="w-5 h-5 fill-current flex-shrink-0 translate-y-[0.5px]" />
+            <PlusIcon className="w-5 h-5 fill-current flex-shrink-0 translate-y-[2px]" />
             <span>Add Tax</span>
           </button>
         </div>
