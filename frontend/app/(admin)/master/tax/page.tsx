@@ -52,7 +52,7 @@ export default function TaxPage() {
   const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
   const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
   
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://pest-control-erp.onrender.com";
 
   const fetchTaxes = async () => {
     try {

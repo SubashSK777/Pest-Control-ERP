@@ -1,4 +1,5 @@
 from rest_framework import viewsets, filters, views
+from rest_framework import viewsets, filters, views, permissions
 from rest_framework.response import Response
 from django.http import HttpResponse
 import pandas as pd
@@ -10,6 +11,7 @@ from .serializers import TaxSerializer
 class TaxViewSet(viewsets.ModelViewSet):
     queryset = Tax.objects.all()
     serializer_class = TaxSerializer
+    permission_classes = [permissions.AllowAny]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'tax_value']
     ordering_fields = ['id', 'name', 'tax_value', 'status']
