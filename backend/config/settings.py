@@ -2,6 +2,9 @@ import os
 import sys
 from pathlib import Path
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(os.path.join(BASE_DIR, 'apps'))
@@ -11,6 +14,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-aflick-v1')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
+if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
+    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,14 +64,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
-    'default': dj_database_url.config(
+    'default': dj_database_url.parse(
+        os.environ.get("DATABASE_URL"),
         conn_max_age=600,
     )
 }
-# Enforce SSL for all connections to Render Postgres
-if 'OPTIONS' not in DATABASES['default']:
-    DATABASES['default']['OPTIONS'] = {}
-DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+
+# SSL Mode Mandatory for Supabase
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
