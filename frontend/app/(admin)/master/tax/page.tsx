@@ -32,13 +32,6 @@ interface Tax {
   status: "Active" | "Inactive";
 }
 
-const initialData: Tax[] = [
-  { id: 1, sNo: 1, name: "Tx9", value: 9, status: "Active" },
-  { id: 2, sNo: 2, name: "Tx8", value: 8, status: "Active" },
-  { id: 3, sNo: 3, name: "N-T", value: 0, status: "Active" },
-  { id: 4, sNo: 4, name: "TX7", value: 7, status: "Active" },
-];
-
 type SortDirection = 'asc' | 'desc' | 'default';
 
 export default function TaxPage() {
@@ -48,7 +41,17 @@ export default function TaxPage() {
   const [sortConfig, setSortConfig] = useState<{ key: keyof Tax, direction: SortDirection }>({ key: 'id', direction: 'default' });
   const [pageSize, setPageSize] = useState(10);
   
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://pest-control-erp.onrender.com";
+  // Modals & UI State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isPageSizeOpen, setIsPageSizeOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
+  const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
+  
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const fetchTaxes = async () => {
     try {
@@ -66,7 +69,9 @@ export default function TaxPage() {
       }));
       setTaxes(mappedData);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch error:", err);
+      // Fallback to empty if fetch fails to avoid showing stale initialData
+      setTaxes([]);
     } finally {
       setLoading(false);
     }
@@ -113,12 +118,14 @@ export default function TaxPage() {
       name: currentTax.name,
       tax_value: currentTax.value,
       status: currentTax.status === 'Active',
-      description: "" // Optional but required by model if not specified
+      description: "" 
     };
 
     try {
       const method = modalMode === 'add' ? 'POST' : 'PUT';
-      const endpoint = modalMode === 'add' ? `${BACKEND_URL}/api/taxes/` : `${BACKEND_URL}/api/taxes/${currentTax.id}/`;
+      const endpoint = modalMode === 'add' 
+        ? `${BACKEND_URL}/api/taxes/` 
+        : `${BACKEND_URL}/api/taxes/${currentTax.id}/`;
       
       const res = await fetch(endpoint, {
         method,
@@ -126,12 +133,15 @@ export default function TaxPage() {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error("Could not save tax");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Could not save tax");
+      }
       
       setIsModalOpen(false);
       fetchTaxes();
-    } catch (err) {
-      alert("Failed to save tax");
+    } catch (err: any) {
+      alert(`Failed to save tax: ${err.message}`);
     }
   };
 
