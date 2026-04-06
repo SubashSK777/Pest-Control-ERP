@@ -49,7 +49,7 @@ export default function TaxPage() {
   const [isPageSizeOpen, setIsPageSizeOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: 0, status: 'Active' });
+  const [currentTax, setCurrentTax] = useState<Partial<Tax>>({ name: '', value: undefined, status: 'Active' });
   const [taxToDelete, setTaxToDelete] = useState<number | null>(null);
   
   const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://pest-control-erp.onrender.com";
@@ -99,7 +99,7 @@ export default function TaxPage() {
 
   const openAddModal = () => {
     setModalMode('add');
-    setCurrentTax({ name: '', value: 0, status: 'Active' });
+    setCurrentTax({ name: '', value: undefined, status: 'Active' });
     setIsModalOpen(true);
   };
 
@@ -286,6 +286,16 @@ export default function TaxPage() {
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 10pt; }
             tr { page-break-inside: avoid; }
+        }
+        
+        /* Hide native number spin buttons */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
         }
       `}</style>
 
@@ -491,12 +501,35 @@ export default function TaxPage() {
 
           <div>
             <Label>Tax Value (%) <span className="text-rose-500">*</span></Label>
-            <Input 
-              type="number" 
-              placeholder="e.g. 10" 
-              value={currentTax.value}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentTax({...currentTax, value: Number(e.target.value)})}
-            />
+            <div className="relative group/num">
+              <Input 
+                type="number" 
+                placeholder="e.g. 7" 
+                value={currentTax.value === undefined ? "" : currentTax.value}
+                min="0"
+                className="pr-10"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const val = e.target.value === "" ? undefined : Math.max(0, Number(e.target.value));
+                  setCurrentTax({...currentTax, value: val});
+                }}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+                <button 
+                  type="button"
+                  onClick={() => setCurrentTax(prev => ({...prev, value: (prev.value || 0) + 1}))}
+                  className="hover:text-brand-500 transition-colors p-0.5"
+                >
+                  <AngleUpIcon className="w-3.5 h-3.5 fill-current" />
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setCurrentTax(prev => ({...prev, value: Math.max(0, (prev.value || 0) - 1)}))}
+                  className="hover:text-brand-500 transition-colors p-0.5"
+                >
+                  <AngleDownIcon className="w-3.5 h-3.5 fill-current" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div>
