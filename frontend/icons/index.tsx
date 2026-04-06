@@ -61,6 +61,8 @@ import BarChartDollarIcon from "./bar-chart-dollar.svg";
 import TrendUpIcon from "./trend-up.svg";
 import RefreshIcon from "./refresh.svg";
 import PrintIcon from "./print.svg";
+import ContractSignedIcon from "./contract-signed.svg";
+import ScdfReportIcon from "./scdf-report.svg";
 
 export {
   PrintIcon,
@@ -135,4 +137,6 @@ export {
   StockIcon as BoxIcon,
   SearchIcon as ListIcon,
   DollarIcon as DollarLineIcon,
+  ContractSignedIcon,
+  ScdfReportIcon,
 };

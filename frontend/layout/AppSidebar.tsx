@@ -28,6 +28,8 @@ import {
   ShieldIcon,
   ChevronDownIcon,
   HorizontaLDots,
+  ContractSignedIcon,
+  ScdfReportIcon,
 } from "../icons/index";
 
 
@@ -119,7 +121,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <FileIcon />,
+    icon: <ContractSignedIcon />,
     name: "Contracts",
     path: "/contracts",
   },
@@ -173,7 +175,7 @@ const reportItems: NavItem[] = [
   { name: "Service Summary Report", icon: <PieChartIcon />, path: "/reports/service-summary" },
   { name: "RIC / Follow-up Report", icon: <BarChartIcon />, path: "/reports/ric-followup" },
   { name: "Productivity Summary", icon: <BarChartDollarIcon />, path: "/reports/productivity" },
-  { name: "SCDF Report", icon: <FileIcon />, path: "/reports/scdf" },
+  { name: "SCDF Report", icon: <ScdfReportIcon />, path: "/reports/scdf" },
   { name: "Sales Report", icon: <DollarIcon />, path: "/reports/sales" },
   { name: "Pest Trending", icon: <TrendUpIcon />, path: "/reports/pest-trending" },
 ];

@@ -135,14 +135,24 @@ export default function TaxPage() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Could not save tax");
+        let errorMsg = "Could not save tax";
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.detail || errorData.error || errorMsg;
+        } catch (e) {
+          errorMsg = `Server error: ${res.status} ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
       }
       
       setIsModalOpen(false);
       fetchTaxes();
     } catch (err: any) {
-      alert(`Failed to save tax: ${err.message}`);
+      if (err.message === "Failed to fetch") {
+        alert("The backend server is unreachable. Please check if the Render backend is live and the URL is correct.");
+      } else {
+        alert(`Error: ${err.message}`);
+      }
     }
   };
 

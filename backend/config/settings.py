@@ -64,16 +64,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
-    'default': dj_database_url.parse(
-        os.environ.get("DATABASE_URL"),
+    'default': dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
+        ssl_require=True
     )
 }
 
-# SSL Mode Mandatory for Supabase
-DATABASES['default']['OPTIONS'] = {
-    'sslmode': 'require',
-}
+# Ensure Postgres-specific settings are applied only when using it
+if 'ENGINE' in DATABASES['default'] and 'postgresql' in DATABASES['default']['ENGINE']:
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -99,7 +101,12 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ALLOW_ALL_ORIGINS = True # Change to specific frontend URL on production
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://a-flick-erp.vercel.app",
+    "http://localhost:3000",
+]
 
 from datetime import timedelta
 SIMPLE_JWT = {
