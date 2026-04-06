@@ -513,20 +513,20 @@ export default function TaxPage() {
                   setCurrentTax({...currentTax, value: val});
                 }}
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity">
                 <button 
                   type="button"
                   onClick={() => setCurrentTax(prev => ({...prev, value: (prev.value || 0) + 1}))}
-                  className="hover:text-brand-500 transition-colors p-0.5"
+                  className="hover:text-brand-500 transition-colors"
                 >
-                  <AngleUpIcon className="w-3.5 h-3.5 fill-current" />
+                  <AngleUpIcon className="w-2.5 h-2.5 fill-current" />
                 </button>
                 <button 
                   type="button"
                   onClick={() => setCurrentTax(prev => ({...prev, value: Math.max(0, (prev.value || 0) - 1)}))}
-                  className="hover:text-brand-500 transition-colors p-0.5"
+                  className="hover:text-brand-500 transition-colors"
                 >
-                  <AngleDownIcon className="w-3.5 h-3.5 fill-current" />
+                  <AngleDownIcon className="w-2.5 h-2.5 fill-current" />
                 </button>
               </div>
             </div>
